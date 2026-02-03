@@ -10,7 +10,10 @@ import {
   Plus, 
   Minus, 
   Share2,
-  ArrowLeft 
+  ArrowLeft,
+  MessageSquare,
+  User,
+  Send
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,9 +28,17 @@ import {
   DialogTrigger,
   DialogFooter
 } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
 import ProductCard from "@/components/ProductCard";
+
+interface Review {
+  id: string;
+  userName: string;
+  comment: string;
+  date: string;
+}
 
 interface ProductColor {
   name: string;
@@ -135,6 +146,27 @@ const ProductDetailPage = () => {
   const [showPurchaseDialog, setShowPurchaseDialog] = useState(false);
   const [paymentType, setPaymentType] = useState<'full' | 'partial'>('full');
   const [userBalance] = useState(1250.00); // Mock user balance
+  const [newComment, setNewComment] = useState("");
+  const [reviews, setReviews] = useState<Review[]>([
+    {
+      id: "1",
+      userName: "أحمد محمد",
+      comment: "منتج رائع جداً، الخامة ممتازة والمقاس مناسب تماماً. أنصح بالشراء!",
+      date: "2024-01-15"
+    },
+    {
+      id: "2",
+      userName: "سارة أحمد",
+      comment: "جودة القماش عالية والتصميم أنيق. وصل في الوقت المحدد.",
+      date: "2024-01-10"
+    },
+    {
+      id: "3",
+      userName: "محمود علي",
+      comment: "تجربة شراء ممتازة، المنتج مطابق للصور تماماً.",
+      date: "2024-01-05"
+    }
+  ]);
 
   useEffect(() => {
     // Simulate API call
@@ -186,8 +218,8 @@ const ProductDetailPage = () => {
 
     if (amountToPay > userBalance) {
       toast({
-        title: "Insufficient balance",
-        description: "Please add more funds to your account or choose partial payment.",
+        title: "رصيد غير كافي",
+        description: "يرجى إضافة المزيد من الرصيد إلى حسابك أو اختيار الدفع الجزئي.",
         variant: "destructive"
       });
       return;
@@ -195,11 +227,37 @@ const ProductDetailPage = () => {
 
     // Simulate purchase
     toast({
-      title: "Purchase successful!",
-      description: `You've successfully purchased ${product.name}. Amount deducted: $${amountToPay.toFixed(2)}`
+      title: "تمت عملية الشراء بنجاح!",
+      description: `تم شراء ${product.name} بنجاح. المبلغ المخصوم: $${amountToPay.toFixed(2)}`
     });
 
     setShowPurchaseDialog(false);
+  };
+
+  const handleAddReview = () => {
+    if (!newComment.trim()) {
+      toast({
+        title: "خطأ",
+        description: "يرجى كتابة تعليق قبل الإرسال",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const newReview: Review = {
+      id: Date.now().toString(),
+      userName: "مستخدم جديد", // In real app, get from auth
+      comment: newComment.trim(),
+      date: new Date().toISOString().split('T')[0]
+    };
+
+    setReviews([newReview, ...reviews]);
+    setNewComment("");
+    
+    toast({
+      title: "تم إضافة التعليق",
+      description: "شكراً لمشاركتك رأيك!"
+    });
   };
 
   const discountPercentage = product?.originalPrice 
@@ -475,9 +533,9 @@ const ProductDetailPage = () => {
         <div className="mt-16">
           <Tabs defaultValue="details" className="w-full">
             <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="details">Details</TabsTrigger>
-              <TabsTrigger value="reviews">Reviews ({product.reviewCount})</TabsTrigger>
-              <TabsTrigger value="shipping">Shipping & Returns</TabsTrigger>
+              <TabsTrigger value="details">التفاصيل</TabsTrigger>
+              <TabsTrigger value="reviews">التعليقات ({reviews.length})</TabsTrigger>
+              <TabsTrigger value="shipping">الشحن والإرجاع</TabsTrigger>
             </TabsList>
             
             <TabsContent value="details" className="mt-8">
@@ -501,10 +559,76 @@ const ProductDetailPage = () => {
             
             <TabsContent value="reviews" className="mt-8">
               <Card>
-                <CardContent className="p-6">
-                  <div className="text-center py-12">
-                    <h3 className="text-lg font-semibold mb-2">Customer Reviews</h3>
-                    <p className="text-muted-foreground">Reviews functionality coming soon...</p>
+                <CardContent className="p-6 space-y-6">
+                  {/* Add Review Form */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold flex items-center gap-2">
+                      <MessageSquare className="h-5 w-5 text-primary" />
+                      أضف تعليقك
+                    </h3>
+                    <div className="space-y-3">
+                      <Textarea
+                        placeholder="اكتب تعليقك هنا..."
+                        value={newComment}
+                        onChange={(e) => setNewComment(e.target.value)}
+                        className="min-h-[100px] resize-none"
+                        dir="rtl"
+                      />
+                      <Button 
+                        onClick={handleAddReview}
+                        className="btn-gradient"
+                        disabled={!newComment.trim()}
+                      >
+                        <Send className="ml-2 h-4 w-4" />
+                        إرسال التعليق
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Reviews List */}
+                  <div className="border-t pt-6">
+                    <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                      <MessageSquare className="h-5 w-5 text-primary" />
+                      التعليقات ({reviews.length})
+                    </h3>
+                    
+                    {reviews.length === 0 ? (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <MessageSquare className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                        <p>لا توجد تعليقات بعد. كن أول من يعلق!</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {reviews.map((review) => (
+                          <Card key={review.id} className="bg-muted/30">
+                            <CardContent className="p-4">
+                              <div className="flex items-start gap-3">
+                                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                                  <User className="h-5 w-5 text-primary" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center justify-between gap-2 mb-2">
+                                    <span className="font-semibold text-foreground">
+                                      {review.userName}
+                                    </span>
+                                    <span className="text-xs text-muted-foreground">
+                                      {new Date(review.date).toLocaleDateString('ar-EG', {
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric'
+                                      })}
+                                    </span>
+                                  </div>
+                                  <p className="text-muted-foreground leading-relaxed">
+                                    {review.comment}
+                                  </p>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ShoppingCart, User, Search, Menu, X, Moon, Sun } from "lucide-react";
+import { ShoppingCart, User, Search, Menu, X, Moon, Sun, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -59,15 +59,25 @@ const Header = ({ userBalance = 1250.00, cartItemsCount = 3 }: HeaderProps) => {
           <div className="flex items-center gap-4">
             <span className="text-muted-foreground">شحن مجاني للطلبات أكثر من 50 جنيه</span>
           </div>
-          <div className="flex items-center gap-4">
-            <span className="font-medium">
-              الرصيد: <span className="text-primary font-bold">{userBalance.toFixed(2)} جنيه</span>
-            </span>
+          <div className="flex items-center gap-3">
+            {/* Beautiful Balance Card */}
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-l from-primary/10 via-purple-500/10 to-primary/5 border border-primary/20 shadow-sm hover:shadow-md transition-all duration-300 group">
+              <div className="w-7 h-7 rounded-full bg-gradient-primary flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <Wallet className="h-3.5 w-3.5 text-white" />
+              </div>
+              <div className="flex flex-col items-end leading-tight">
+                <span className="text-[10px] text-muted-foreground font-medium">الرصيد</span>
+                <span className="text-sm font-bold bg-gradient-primary bg-clip-text text-transparent">
+                  {userBalance.toFixed(2)} جنيه
+                </span>
+              </div>
+            </div>
+            
             <Button
               variant="ghost"
               size="sm"
               onClick={toggleTheme}
-              className="h-8 w-8 p-0"
+              className="h-8 w-8 p-0 rounded-full hover:bg-primary/10"
             >
               {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>

@@ -13,7 +13,11 @@ import {
   ArrowLeft,
   MessageSquare,
   User,
-  Send
+  Send,
+  Edit2,
+  Trash2,
+  X,
+  Check
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -38,6 +42,7 @@ interface Review {
   userName: string;
   comment: string;
   date: string;
+  isOwner: boolean;
 }
 
 interface ProductColor {
@@ -147,24 +152,29 @@ const ProductDetailPage = () => {
   const [paymentType, setPaymentType] = useState<'full' | 'partial'>('full');
   const [userBalance] = useState(1250.00); // Mock user balance
   const [newComment, setNewComment] = useState("");
+  const [editingReviewId, setEditingReviewId] = useState<string | null>(null);
+  const [editingComment, setEditingComment] = useState("");
   const [reviews, setReviews] = useState<Review[]>([
     {
       id: "1",
       userName: "أحمد محمد",
       comment: "منتج رائع جداً، الخامة ممتازة والمقاس مناسب تماماً. أنصح بالشراء!",
-      date: "2024-01-15"
+      date: "2024-01-15",
+      isOwner: false
     },
     {
       id: "2",
       userName: "سارة أحمد",
       comment: "جودة القماش عالية والتصميم أنيق. وصل في الوقت المحدد.",
-      date: "2024-01-10"
+      date: "2024-01-10",
+      isOwner: false
     },
     {
       id: "3",
       userName: "محمود علي",
       comment: "تجربة شراء ممتازة، المنتج مطابق للصور تماماً.",
-      date: "2024-01-05"
+      date: "2024-01-05",
+      isOwner: false
     }
   ]);
 
@@ -248,7 +258,8 @@ const ProductDetailPage = () => {
       id: Date.now().toString(),
       userName: "مستخدم جديد", // In real app, get from auth
       comment: newComment.trim(),
-      date: new Date().toISOString().split('T')[0]
+      date: new Date().toISOString().split('T')[0],
+      isOwner: true
     };
 
     setReviews([newReview, ...reviews]);
@@ -257,6 +268,51 @@ const ProductDetailPage = () => {
     toast({
       title: "تم إضافة التعليق",
       description: "شكراً لمشاركتك رأيك!"
+    });
+  };
+
+  const handleEditReview = (reviewId: string) => {
+    const review = reviews.find(r => r.id === reviewId);
+    if (review) {
+      setEditingReviewId(reviewId);
+      setEditingComment(review.comment);
+    }
+  };
+
+  const handleSaveEdit = () => {
+    if (!editingComment.trim()) {
+      toast({
+        title: "خطأ",
+        description: "لا يمكن حفظ تعليق فارغ",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setReviews(reviews.map(review => 
+      review.id === editingReviewId 
+        ? { ...review, comment: editingComment.trim() }
+        : review
+    ));
+    setEditingReviewId(null);
+    setEditingComment("");
+    
+    toast({
+      title: "تم تعديل التعليق",
+      description: "تم حفظ التعديلات بنجاح"
+    });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingReviewId(null);
+    setEditingComment("");
+  };
+
+  const handleDeleteReview = (reviewId: string) => {
+    setReviews(reviews.filter(review => review.id !== reviewId));
+    toast({
+      title: "تم حذف التعليق",
+      description: "تم حذف التعليق بنجاح"
     });
   };
 
@@ -608,20 +664,79 @@ const ProductDetailPage = () => {
                                 </div>
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-center justify-between gap-2 mb-2">
-                                    <span className="font-semibold text-foreground">
-                                      {review.userName}
-                                    </span>
-                                    <span className="text-xs text-muted-foreground">
-                                      {new Date(review.date).toLocaleDateString('ar-EG', {
-                                        year: 'numeric',
-                                        month: 'long',
-                                        day: 'numeric'
-                                      })}
-                                    </span>
+                                    <div className="flex items-center gap-2">
+                                      <span className="font-semibold text-foreground">
+                                        {review.userName}
+                                      </span>
+                                      {review.isOwner && (
+                                        <Badge variant="secondary" className="text-xs">
+                                          أنت
+                                        </Badge>
+                                      )}
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-xs text-muted-foreground">
+                                        {new Date(review.date).toLocaleDateString('ar-EG', {
+                                          year: 'numeric',
+                                          month: 'long',
+                                          day: 'numeric'
+                                        })}
+                                      </span>
+                                      {review.isOwner && editingReviewId !== review.id && (
+                                        <div className="flex items-center gap-1">
+                                          <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-7 w-7 hover:bg-primary/10 hover:text-primary"
+                                            onClick={() => handleEditReview(review.id)}
+                                          >
+                                            <Edit2 className="h-3.5 w-3.5" />
+                                          </Button>
+                                          <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-7 w-7 hover:bg-destructive/10 hover:text-destructive"
+                                            onClick={() => handleDeleteReview(review.id)}
+                                          >
+                                            <Trash2 className="h-3.5 w-3.5" />
+                                          </Button>
+                                        </div>
+                                      )}
+                                    </div>
                                   </div>
-                                  <p className="text-muted-foreground leading-relaxed">
-                                    {review.comment}
-                                  </p>
+                                  
+                                  {editingReviewId === review.id ? (
+                                    <div className="space-y-3">
+                                      <Textarea
+                                        value={editingComment}
+                                        onChange={(e) => setEditingComment(e.target.value)}
+                                        className="min-h-[80px] resize-none"
+                                        dir="rtl"
+                                      />
+                                      <div className="flex items-center gap-2">
+                                        <Button
+                                          size="sm"
+                                          onClick={handleSaveEdit}
+                                          className="btn-gradient"
+                                        >
+                                          <Check className="ml-1 h-3.5 w-3.5" />
+                                          حفظ
+                                        </Button>
+                                        <Button
+                                          size="sm"
+                                          variant="outline"
+                                          onClick={handleCancelEdit}
+                                        >
+                                          <X className="ml-1 h-3.5 w-3.5" />
+                                          إلغاء
+                                        </Button>
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <p className="text-muted-foreground leading-relaxed">
+                                      {review.comment}
+                                    </p>
+                                  )}
                                 </div>
                               </div>
                             </CardContent>

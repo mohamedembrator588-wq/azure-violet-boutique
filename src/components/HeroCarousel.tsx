@@ -27,41 +27,36 @@ const items: CarouselItem[] = [
 ];
 
 const HeroCarousel = () => {
-  const [currentSlide, setCurrentSlide] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const isMobile = useIsMobile();
   
-  const itemsPerSlide = isMobile ? 1 : 4;
-  const totalSlides = Math.ceil(items.length / itemsPerSlide);
+  const visibleItems = isMobile ? 1 : 4;
+  const maxIndex = items.length - visibleItems;
 
   useEffect(() => {
     if (!isAutoPlaying) return;
 
     const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % totalSlides);
+      setCurrentIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
     }, 4000);
 
     return () => clearInterval(interval);
-  }, [isAutoPlaying, totalSlides]);
+  }, [isAutoPlaying, maxIndex]);
 
   const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % totalSlides);
+    setCurrentIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
     setIsAutoPlaying(false);
   };
 
   const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + totalSlides) % totalSlides);
+    setCurrentIndex((prev) => (prev <= 0 ? maxIndex : prev - 1));
     setIsAutoPlaying(false);
   };
 
   const goToSlide = (index: number) => {
-    setCurrentSlide(index);
+    setCurrentIndex(index);
     setIsAutoPlaying(false);
-  };
-
-  const getCurrentItems = () => {
-    const startIndex = currentSlide * itemsPerSlide;
-    return items.slice(startIndex, startIndex + itemsPerSlide);
   };
 
   return (
@@ -75,11 +70,17 @@ const HeroCarousel = () => {
 
         {/* Carousel Content */}
         <div className="relative overflow-hidden">
-          <div className={`grid gap-4 transition-all duration-500 ${isMobile ? 'grid-cols-1' : 'grid-cols-4'}`}>
-            {getCurrentItems().map((item) => (
+          <div 
+            className="flex transition-transform duration-500 ease-in-out gap-4"
+            style={{ 
+              transform: `translateX(calc(${currentIndex * (100 / visibleItems)}% + ${currentIndex * 16}px))` 
+            }}
+          >
+            {items.map((item) => (
               <div
                 key={item.id}
-                className="group relative overflow-hidden rounded-lg bg-card shadow-md hover:shadow-xl transition-all duration-300"
+                className="group relative overflow-hidden rounded-lg bg-card shadow-md hover:shadow-xl transition-all duration-300 flex-shrink-0"
+                style={{ width: `calc(${100 / visibleItems}% - ${(visibleItems - 1) * 16 / visibleItems}px)` }}
               >
                 <div className="aspect-[4/5] overflow-hidden">
                   <img
@@ -123,11 +124,11 @@ const HeroCarousel = () => {
 
         {/* Slide Indicators */}
         <div className="flex justify-center gap-2 mt-6">
-          {Array.from({ length: totalSlides }).map((_, index) => (
+          {Array.from({ length: maxIndex + 1 }).map((_, index) => (
             <button
               key={index}
               className={`h-2 rounded-full transition-all duration-300 ${
-                index === currentSlide
+                index === currentIndex
                   ? "bg-primary w-8"
                   : "bg-primary/30 w-2 hover:bg-primary/50"
               }`}

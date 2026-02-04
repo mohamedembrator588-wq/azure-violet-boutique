@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ArrowRight, Star, TrendingUp, Users } from "lucide-react";
+import { ArrowRight, Star, TrendingUp, Users, Facebook, Instagram, Twitter, Youtube, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -265,18 +265,32 @@ const HomePage = () => {
             </div>
             
             <div>
-              <h4 className="font-semibold mb-4">Connect</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-primary transition-colors">Facebook</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Instagram</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Twitter</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">YouTube</a></li>
-              </ul>
+              <h4 className="font-semibold mb-4">تواصل معنا</h4>
+              <div className="flex items-center gap-3">
+                <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-primary/10 hover:bg-primary hover:text-white flex items-center justify-center transition-all duration-300">
+                  <Facebook className="h-5 w-5" />
+                </a>
+                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-primary/10 hover:bg-gradient-to-r hover:from-purple-500 hover:to-pink-500 hover:text-white flex items-center justify-center transition-all duration-300">
+                  <Instagram className="h-5 w-5" />
+                </a>
+                <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-primary/10 hover:bg-sky-500 hover:text-white flex items-center justify-center transition-all duration-300">
+                  <Twitter className="h-5 w-5" />
+                </a>
+                <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-primary/10 hover:bg-red-500 hover:text-white flex items-center justify-center transition-all duration-300">
+                  <Youtube className="h-5 w-5" />
+                </a>
+                <a href="https://wa.me/201234567890" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-primary/10 hover:bg-green-500 hover:text-white flex items-center justify-center transition-all duration-300">
+                  <MessageCircle className="h-5 w-5" />
+                </a>
+              </div>
             </div>
           </div>
           
-          <div className="border-t mt-8 pt-8 text-center text-sm text-muted-foreground">
-            <p>&copy; 2024 TrendyCloth. All rights reserved.</p>
+          <div className="border-t mt-8 pt-8 text-center">
+            <p className="text-sm text-muted-foreground mb-2">&copy; 2024 متجر الأزياء. جميع الحقوق محفوظة.</p>
+            <p className="text-sm font-medium bg-gradient-primary bg-clip-text text-transparent">
+              تمت البرمجة بواسطة المهندس محمد
+            </p>
           </div>
         </div>
       </footer>

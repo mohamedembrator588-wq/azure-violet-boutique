@@ -1,74 +1,56 @@
 import { useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight, ShoppingBag } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Link } from "react-router-dom";
+import { useIsMobile } from "@/hooks/use-mobile";
 
-interface CarouselSlide {
+interface CarouselItem {
   id: number;
-  title: string;
-  subtitle: string;
-  description: string;
   image: string;
-  ctaText: string;
-  ctaLink: string;
-  backgroundColor: string;
+  title: string;
+  price: string;
 }
 
-const slides: CarouselSlide[] = [
-  {
-    id: 1,
-    title: "New Spring Collection",
-    subtitle: "Fresh Styles for 2024",
-    description: "Discover the latest trends in fashion with our curated spring collection. Premium quality meets modern design.",
-    image: "https://picsum.photos/1920/800?random=1",
-    ctaText: "Shop Collection",
-    ctaLink: "/category/new",
-    backgroundColor: "from-primary to-secondary"
-  },
-  {
-    id: 2,
-    title: "Summer Sale",
-    subtitle: "Up to 70% Off",
-    description: "Don't miss out on amazing deals across all categories. Limited time offer on premium clothing and accessories.",
-    image: "https://picsum.photos/1920/800?random=2",
-    ctaText: "Shop Sale",
-    ctaLink: "/category/sale",
-    backgroundColor: "from-secondary to-primary"
-  },
-  {
-    id: 3,
-    title: "Premium Denim",
-    subtitle: "Crafted to Perfection",
-    description: "Experience the finest denim collection with perfect fits and exceptional comfort. Made from sustainable materials.",
-    image: "https://picsum.photos/1920/800?random=3",
-    ctaText: "Explore Denim",
-    ctaLink: "/category/denim",
-    backgroundColor: "from-primary-light to-secondary-dark"
-  }
+const items: CarouselItem[] = [
+  { id: 1, image: "https://picsum.photos/400/500?random=1", title: "فستان صيفي أنيق", price: "299 ر.س" },
+  { id: 2, image: "https://picsum.photos/400/500?random=2", title: "بلوزة كاجوال", price: "149 ر.س" },
+  { id: 3, image: "https://picsum.photos/400/500?random=3", title: "بنطلون جينز", price: "199 ر.س" },
+  { id: 4, image: "https://picsum.photos/400/500?random=4", title: "جاكيت شتوي", price: "399 ر.س" },
+  { id: 5, image: "https://picsum.photos/400/500?random=5", title: "تنورة قصيرة", price: "129 ر.س" },
+  { id: 6, image: "https://picsum.photos/400/500?random=6", title: "قميص رسمي", price: "179 ر.س" },
+  { id: 7, image: "https://picsum.photos/400/500?random=7", title: "فستان سهرة", price: "599 ر.س" },
+  { id: 8, image: "https://picsum.photos/400/500?random=8", title: "بدلة رجالي", price: "899 ر.س" },
+  { id: 9, image: "https://picsum.photos/400/500?random=9", title: "حذاء رياضي", price: "249 ر.س" },
+  { id: 10, image: "https://picsum.photos/400/500?random=10", title: "حقيبة يد", price: "349 ر.س" },
+  { id: 11, image: "https://picsum.photos/400/500?random=11", title: "ساعة أنيقة", price: "499 ر.س" },
+  { id: 12, image: "https://picsum.photos/400/500?random=12", title: "نظارة شمسية", price: "199 ر.س" },
 ];
 
 const HeroCarousel = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  const isMobile = useIsMobile();
+  
+  const itemsPerSlide = isMobile ? 1 : 4;
+  const totalSlides = Math.ceil(items.length / itemsPerSlide);
 
   useEffect(() => {
     if (!isAutoPlaying) return;
 
     const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, 5000); // Auto-switch every 5 seconds
+      setCurrentSlide((prev) => (prev + 1) % totalSlides);
+    }, 4000);
 
     return () => clearInterval(interval);
-  }, [isAutoPlaying]);
+  }, [isAutoPlaying, totalSlides]);
 
   const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % slides.length);
+    setCurrentSlide((prev) => (prev + 1) % totalSlides);
     setIsAutoPlaying(false);
   };
 
   const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+    setCurrentSlide((prev) => (prev - 1 + totalSlides) % totalSlides);
     setIsAutoPlaying(false);
   };
 
@@ -77,115 +59,92 @@ const HeroCarousel = () => {
     setIsAutoPlaying(false);
   };
 
-  return (
-    <Card className="relative overflow-hidden rounded-lg">
-      <div className="relative h-[70vh] min-h-[500px] w-full overflow-hidden">
-        {slides.map((slide, index) => (
-          <div
-            key={slide.id}
-            className={`absolute inset-0 transition-transform duration-700 ease-in-out ${
-              index === currentSlide
-                ? "translate-x-0"
-                : index < currentSlide
-                ? "-translate-x-full"
-                : "translate-x-full"
-            }`}
-          >
-            {/* Background Image */}
-            <div className="absolute inset-0">
-              <img
-                src={slide.image}
-                alt={slide.title}
-                className="h-full w-full object-cover"
-              />
-              <div className={`absolute inset-0 bg-gradient-to-r ${slide.backgroundColor} opacity-80`} />
-            </div>
+  const getCurrentItems = () => {
+    const startIndex = currentSlide * itemsPerSlide;
+    return items.slice(startIndex, startIndex + itemsPerSlide);
+  };
 
-            {/* Content */}
-            <div className="relative z-10 flex h-full items-center">
-              <div className="container mx-auto px-4">
-                <div className="max-w-2xl text-white">
-                  <div className="animate-fade-in-up">
-                    <p className="text-sm font-medium uppercase tracking-wider opacity-90 mb-2">
-                      {slide.subtitle}
-                    </p>
-                    <h1 className="text-4xl md:text-6xl font-bold mb-4 leading-tight">
-                      {slide.title}
-                    </h1>
-                    <p className="text-lg md:text-xl mb-8 opacity-90 leading-relaxed">
-                      {slide.description}
-                    </p>
-                    <div className="flex flex-col sm:flex-row gap-4">
-                      <Button
-                        asChild
-                        size="lg"
-                        className="bg-white text-primary hover:bg-white/90 font-semibold"
-                      >
-                        <Link to={slide.ctaLink}>
-                          <ShoppingBag className="mr-2 h-5 w-5" />
-                          {slide.ctaText}
-                        </Link>
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="lg"
-                        className="border-white text-white hover:bg-white hover:text-primary"
-                        asChild
-                      >
-                        <Link to="/products">
-                          View All Products
-                        </Link>
-                      </Button>
-                    </div>
-                  </div>
+  return (
+    <Card className="relative overflow-hidden rounded-lg bg-gradient-to-r from-primary/5 to-secondary/5">
+      <div className="relative py-8 px-4">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h2 className="text-2xl md:text-3xl font-bold mb-2">أحدث المنتجات</h2>
+          <p className="text-muted-foreground">اكتشف تشكيلتنا المميزة</p>
+        </div>
+
+        {/* Carousel Content */}
+        <div className="relative overflow-hidden">
+          <div className={`grid gap-4 transition-all duration-500 ${isMobile ? 'grid-cols-1' : 'grid-cols-4'}`}>
+            {getCurrentItems().map((item) => (
+              <div
+                key={item.id}
+                className="group relative overflow-hidden rounded-lg bg-card shadow-md hover:shadow-xl transition-all duration-300"
+              >
+                <div className="aspect-[4/5] overflow-hidden">
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="absolute bottom-0 left-0 right-0 p-4 text-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                  <h3 className="font-semibold text-lg mb-1">{item.title}</h3>
+                  <p className="text-primary-light font-bold">{item.price}</p>
+                </div>
+                {/* Always visible overlay for mobile */}
+                <div className="md:hidden absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
+                  <h3 className="font-semibold text-white text-sm">{item.title}</h3>
+                  <p className="text-primary-light font-bold text-sm">{item.price}</p>
                 </div>
               </div>
-            </div>
+            ))}
           </div>
-        ))}
+        </div>
 
         {/* Navigation Arrows */}
         <Button
           variant="secondary"
           size="icon"
-          className="absolute left-4 top-1/2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30"
+          className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 z-20 h-10 w-10 md:h-12 md:w-12 rounded-full bg-white/90 hover:bg-white shadow-lg"
           onClick={prevSlide}
         >
-          <ChevronLeft className="h-6 w-6" />
+          <ChevronRight className="h-5 w-5 md:h-6 md:w-6" />
         </Button>
         <Button
           variant="secondary"
           size="icon"
-          className="absolute right-4 top-1/2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30"
+          className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 z-20 h-10 w-10 md:h-12 md:w-12 rounded-full bg-white/90 hover:bg-white shadow-lg"
           onClick={nextSlide}
         >
-          <ChevronRight className="h-6 w-6" />
+          <ChevronLeft className="h-5 w-5 md:h-6 md:w-6" />
         </Button>
 
         {/* Slide Indicators */}
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex gap-2">
-          {slides.map((_, index) => (
+        <div className="flex justify-center gap-2 mt-6">
+          {Array.from({ length: totalSlides }).map((_, index) => (
             <button
               key={index}
-              className={`h-2 w-2 rounded-full transition-all duration-300 ${
+              className={`h-2 rounded-full transition-all duration-300 ${
                 index === currentSlide
-                  ? "bg-white w-8"
-                  : "bg-white/50 hover:bg-white/70"
+                  ? "bg-primary w-8"
+                  : "bg-primary/30 w-2 hover:bg-primary/50"
               }`}
               onClick={() => goToSlide(index)}
             />
           ))}
         </div>
 
-        {/* Auto-play indicator */}
-        <div className="absolute top-4 right-4 z-20">
+        {/* Auto-play toggle */}
+        <div className="absolute top-2 left-2 z-20">
           <Button
             variant="ghost"
             size="sm"
-            className="text-white/70 hover:text-white text-xs"
+            className="text-muted-foreground hover:text-foreground text-xs"
             onClick={() => setIsAutoPlaying(!isAutoPlaying)}
           >
-            {isAutoPlaying ? "⏸️ Pause" : "▶️ Play"}
+            {isAutoPlaying ? "⏸️" : "▶️"}
           </Button>
         </div>
       </div>
